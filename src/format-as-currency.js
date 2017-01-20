@@ -51,6 +51,22 @@ angular
 
     return parseFloat(currencyString.replace(/(\$|\,)+/g, ''), 10)
   }
+  
+  // (inputValue: number, minValue: number) => true/false
+  // eg. (0.1,1) => false
+  // eg. (1, 1) => true
+  this.minValidator = function(inputValue, minValue) {
+    if(!minValue) return true;
+    if(inputValue < minValue) { return false } else { return true }
+  }
+  
+  // (inputValue: number, maxValue: number) => true/false
+  // eg. (300,100) => false
+  // eg. (100,300) => true
+  this.maxValidator = function(inputValue, maxValue) {
+    if(!maxValue) return true; 
+    if(inputValue <= maxValue) { return true } else { return false }
+  }
 
   // (array: Array) => Array
   // eg. [1,2,2] => [1,2]
@@ -89,6 +105,10 @@ angular
   return {
     require: 'ngModel',
     restrict: 'A',
+    scope: {
+      facMin: '=',
+      facMax: '='
+    },
     link: function (scope, element, attrs, ngModel) {
 
       var filter = $filter('currency')
@@ -148,6 +168,14 @@ angular
 
       ngModel.$validators.currency = function (modelValue) {
         return !isNaN(modelValue)
+      }
+
+      ngModel.$validators.min = function (modelValue) {
+        return util.minValidator(modelValue, scope.facMin);
+      }
+
+      ngModel.$validators.max = function (modelValue) {
+        return util.maxValidator(modelValue, scope.facMax);
       }
 
       // manually trigger the $formatters pipeline
